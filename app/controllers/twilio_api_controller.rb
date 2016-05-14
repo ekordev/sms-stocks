@@ -5,9 +5,6 @@ class TwilioApiController < ApplicationController
     message = SmsRequestService.get_data(params)
     puts params.inspect
     puts message
-    twiml = Twilio::TwiML::Response.new do |r|
-      r.Message message
-    end
-    render xml: twiml.text
+    render xml: TwilioService.generate_response(message)
   end
 end

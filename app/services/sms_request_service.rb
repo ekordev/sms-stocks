@@ -1,5 +1,5 @@
 class SmsRequestService
-  @@cache = ActiveSupport::Cache::MemoryStore.new
+
   def self.get_last_stock(phone_num)
     return @@cache.fetch(phone_num)
   end
@@ -12,37 +12,41 @@ class SmsRequestService
   end
 
   def self.get_stocks_price(stocks, from)
-    @@cache.write(from,stocks[0])
-    arr_stocks_data = StockService.get_price(stocks)
-    ret_text = ''
-    arr_stocks_data.each do |stock_data|
-      if stock_data[:price]==0
-        ret_text<<"No data found for symbol: #{stock_data[:symbol]}\n"
-      else
-        ret_text<<"Symbol: #{stock_data[:symbol]}, price: #{stock_data[:price]}\n"
-      end
+    if !from.blank?
+      user = Users.find_by_phone_num(from) || Users.create(:phone_num => from)
+      user.last_ticker = stocks[0]
+      user.save
     end
+    arr_stocks_data = StockService.get_price(stocks)
+    ret_text = ParsingUtils.generate_stocks_text(arr_stocks_data)
     return ret_text
   end
 
   def self.get_data(params)
     text_body = params['Body']
     ret_data = ''
-    if text_body.downcase=="more info"
-      ticker = get_last_stock(params['From'])
-      if ticker.blank?
+    if text_body.blank? || text_body=="?" || text_body=="help"
+      ret_data = "Usage: ticker, tickers, more info\nMore to come, stay tuned..."
+    elsif text_body.downcase=="more info"
+      user = Users.find_by_phone_num(params['From'])
+      if user.nil? || user.last_ticker.nil?
         ret_data = "No ticker fround for 'more info' command, please send a ticker inquery prior to this command"
       else
-        ret_data = self.get_stock_more_info(ticker)
+        ret_data = self.get_stock_more_info(user.last_ticker)
       end
-    elsif text_body.include? ' '
-      arr_stocks = text_body.split(' ')
-      ret_data = self.get_stocks_price(arr_stocks,params['From'])
-    elsif text_body.include? ','
-      arr_stocks = text_body.split(',')
-      ret_data = self.get_stocks_price(arr_stocks,params['From'])
+    elsif text_body.downcase.include? "subscribe"
+      if params['From'].blank?
+        ret_data = "Cannot identify your phone numbers, please use SMS"
+      else
+        ret_data = SubscriptionService.subscribe(text_body,params['From'])
+      end
     else
-      ret_data = self.get_stocks_price([text_body],params['From'])
+      arr_stocks = ParsingUtils.get_stock_tickers(text_body)
+      if arr_stocks.nil?
+        ret_data = "No stock symbols found"
+      else
+        ret_data = self.get_stocks_price(arr_stocks,params['From'])
+      end
     end
 
     return ret_data

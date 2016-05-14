@@ -11,9 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 20160514184757) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "users", force: :cascade do |t|
+    t.string "phone_num",          null: false
+    t.string "last_ticker"
+    t.string "subscribed_tickers"
+  end
+
+  add_index "users", ["phone_num"], name: "index_users_on_phone_num", unique: true, using: :btree
 
 end
