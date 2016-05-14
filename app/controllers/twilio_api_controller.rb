@@ -3,6 +3,8 @@ class TwilioApiController < ApplicationController
 
   def sms
     message = SmsRequestService.get_data(params)
+    puts params.inspect
+    puts message
     twiml = Twilio::TwiML::Response.new do |r|
       r.Message message
     end
