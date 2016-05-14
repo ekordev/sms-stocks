@@ -8,15 +8,16 @@ class TwilioApiController < ApplicationController
       status = "ERROR"
       stock_price=0
     end
-    #render :json =>
-    #  {
-    #    "status" => status,
-    #    "price": stock_price
-    #  },
-    #  status: 200
-    twiml = Twilio::TwiML::Response.new do |r|
-      r.Message "Price for stock symbol: #{ticker} is: #{stock_price}"
-    end
-    twiml.text
+    render :json =>
+      {
+        "status" => status,
+        "price": stock_price
+      },
+      status: 200
+
+    #twiml = Twilio::TwiML::Response.new do |r|
+    #  r.Message "Price for stock symbol: #{ticker} is: #{stock_price}"
+    #end
+    #twiml.text
   end
 end
