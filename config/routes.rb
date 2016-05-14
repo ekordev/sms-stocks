@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  post '/twilio' => 'twilio_api#sms'
+  match '/twilio' => 'twilio_api#sms' , via: [:get, :post]
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
