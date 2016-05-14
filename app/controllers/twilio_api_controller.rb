@@ -1,22 +1,10 @@
 class TwilioApiController < ApplicationController
   require 'twilio-ruby'
-  def sms
-    ticker = params['Body']
-    status = "OK"
-    is_success, stock_price = StockService.get_price(ticker)
-    if !is_success
-      status = "ERROR"
-      stock_price=0
-    end
-    #render :json =>
-    #  {
-    #    "status" => status,
-    #    "price": stock_price
-    #  },
-    #  status: 200
 
+  def sms
+    message = SmsRequestService.get_data(params)
     twiml = Twilio::TwiML::Response.new do |r|
-      r.Message "Price for stock symbol: #{ticker} is: #{stock_price}"
+      r.Message message
     end
     render xml: twiml.text
   end
