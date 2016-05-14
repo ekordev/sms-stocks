@@ -16,7 +16,11 @@ class SmsRequestService
     arr_stocks_data = StockService.get_price(stocks)
     ret_text = ''
     arr_stocks_data.each do |stock_data|
-      ret_text<<"Symbol: #{stock_data[:symbol]}, price: #{stock_data[:price]}\n"
+      if stock_data[:price]==0
+        ret_text<<"No data found for symbol: #{stock_data[:symbol]}\n"
+      else
+        ret_text<<"Symbol: #{stock_data[:symbol]}, price: #{stock_data[:price]}\n"
+      end
     end
     return ret_text
   end
