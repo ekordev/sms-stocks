@@ -5,19 +5,37 @@ class SubscriptionService
     arr_stocks = ParsingUtils.get_stock_tickers(text_body)
   end
 
-  def self.subscribe(text_body,phone)
-    user = Users.find_by_phone_num(phone) || Users.create(:phone_num => phone)
-    tickers = self.get_tickers(text_body)
-    tickers = StockService.get_valid_tickers(tickers) if !tickers.nil?
-    ret_text = ''
-    if tickers.nil? || tickers.length==0
-      ret_text = 'Cannot find any valid stock symbols to subscribe'
-    else
-      user.subscribed_tickers = tickers
-      user.save
-      ret_text = "Successfully subscribed for: #{ParsingUtils.array_to_readable(tickers)}"
+  def self.unsubscribe(from)
+    return ParsingUtils.get_no_from_message if from.blank?
+    user = Users.find_by_phone_num(from)
+    return "User not found" if user.nil?
+    begin
+      user.subscribed_tickers=nil
+      user.save!
+      return "Unsubscribed"
+    rescue Exception => e
+      return e
     end
-    return ret_text
+  end
+
+  def self.subscribe(text_body,from)
+    return ParsingUtils.get_no_from_message if from.blank?
+    user = Users.find_by_phone_num(from) || Users.create(:phone_num => from)
+    tickers = self.get_tickers(text_body)
+    tickers = StockCoreService.get_valid_tickers(tickers) if !tickers.nil?
+    ret_text = ''
+    begin
+      if tickers.nil? || tickers.length==0
+        ret_text = 'Cannot find any valid stock symbols to subscribe'
+      else
+        user.subscribed_tickers = tickers
+        user.save!
+        ret_text = "Successfully subscribed for: #{ParsingUtils.array_to_readable(tickers)}"
+      end
+      return ret_text
+    rescue Exception => e
+      return e
+    end
   end
 
   def self.notify_users(users,arr_stocks)
@@ -53,7 +71,7 @@ class SubscriptionService
     arr_tickers = tickers_set.to_a
     return nil if tickers_set.length==0 || users_to_notify.length == 0
 
-    arr_stocks = StockService.get_price(arr_tickers)
+    arr_stocks = StockCoreService.get_price(arr_tickers)
     self.notify_users(users_to_notify,arr_stocks)
     return users
   end

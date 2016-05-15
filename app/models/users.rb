@@ -1,6 +1,7 @@
 class Users < ActiveRecord::Base
   require 'json'
   after_initialize :custom_init
+  validates :phone_num,  length: { minimum: 3, message: 'from is too short'}
 
   def subscribed_tickers_arr
     if(@subscribed_tickers_arr_cache == 0)

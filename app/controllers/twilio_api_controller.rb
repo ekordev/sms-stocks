@@ -3,8 +3,6 @@ class TwilioApiController < ApplicationController
   require 'twilio-ruby'
   def sms
     message = SmsRequestService.get_data(params)
-    puts params.inspect
-    puts message
     render xml: TwilioService.generate_response(message)
   end
 end
