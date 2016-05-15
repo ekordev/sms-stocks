@@ -28,6 +28,7 @@ class StockService
       return ret_text
     end
 
+    #save one of valid tickers for this user to support more info command
     def self.save_first_valid_stock(arr_stocks, from)
       if !from.blank?
         user = Users.find_by_phone_num(from) || Users.create(:phone_num => from)

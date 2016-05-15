@@ -1,9 +1,5 @@
 class SubscriptionService
   require 'json'
-  def self.get_tickers(text_body)
-    text_body.gsub!(/(subscribe)/i,'')
-    arr_stocks = ParsingUtils.get_stock_tickers(text_body)
-  end
 
   def self.unsubscribe(from)
     return ParsingUtils.get_no_from_message if from.blank?
@@ -38,29 +34,16 @@ class SubscriptionService
     end
   end
 
-  def self.notify_users(users,arr_stocks)
-    set_stocks = {}
-    arr_stocks.each do |stock|
-      set_stocks[stock[:symbol]] = stock
-    end
-
-    users.each do |user|
-      stocks_per_user = []
-      user.subscribed_tickers_arr.each do |ticker|
-        stocks_per_user << set_stocks[ticker]
-      end
-      message = ParsingUtils.generate_stocks_text(stocks_per_user)
-      TwilioService.send_message(user.phone_num,message)
-    end
-  end
-
   def self.notify_subscribers
+    # combine all tickers from all users into one hashset to avoid duplicate calls for the same tickers
+    # assuming that calls to stock service might cost money; it will also take much longer than
+    # in memory operations to create the hash set and organize the result later on per user
     tickers_set = Set.new
+    # collect here only subscribed users
     users_to_notify = []
     users = Users.all
     users.each do |user|
       if !user.subscribed_tickers_arr.nil?
-        puts "here"
         users_to_notify << user
         user.subscribed_tickers_arr.each do |ticker|
           tickers_set << ticker
@@ -75,4 +58,27 @@ class SubscriptionService
     self.notify_users(users_to_notify,arr_stocks)
     return users
   end
+
+  private
+    def self.notify_users(users,arr_stocks)
+      # create a hashtable from stocks array, to faster access it when organizing per user
+      set_stocks = {}
+      arr_stocks.each do |stock|
+        set_stocks[stock[:symbol]] = stock
+      end
+
+      users.each do |user|
+        stocks_per_user = []
+        user.subscribed_tickers_arr.each do |ticker|
+          stocks_per_user << set_stocks[ticker]
+        end
+        message = ParsingUtils.generate_stocks_text(stocks_per_user)
+        TwilioService.send_message(user.phone_num,message)
+      end
+    end
+
+    def self.get_tickers(text_body)
+      text_body.gsub!(/(subscribe)/i,'')
+      arr_stocks = ParsingUtils.get_stock_tickers(text_body)
+    end
 end

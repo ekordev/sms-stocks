@@ -5,7 +5,7 @@ class StockCoreService
 
   def self.get_stock_json(stock)
     return {
-      :price  => stock.ask || 0,
+      :price  => stock.ask || 0, # when stock is not found, price will be null
       :symbol => stock.symbol.upcase
     }
   end
@@ -36,6 +36,7 @@ class StockCoreService
     }
   end
 
+  # given array of tickers, return array of valid tickers
   def self.get_valid_tickers(tickers)
     stocks = self.get_price(tickers)
     arr_valid = []
