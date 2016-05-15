@@ -6,7 +6,7 @@ class SmsRequestService
       ret_data = "Usage: ticker, tickers, more info, subscribe, unsubscribe\nMore to come, stay tuned..."
     elsif text_body.downcase=="more info"
       ret_data = StockService.more_info(params['From'])
-    elsif text_body.downcase.include? "unsubscribe"
+    elsif text_body.downcase.include? "unsub"
       ret_data = SubscriptionService.unsubscribe(params['From'])
     elsif text_body.downcase.include? "subscribe"
         ret_data = SubscriptionService.subscribe(text_body,params['From'])
