@@ -14,7 +14,7 @@ Params
 
 Available commands
   - subscribe ticker(s)
-  - unsubscribe
+  - unsub
   - ticker(s)
   - more info
   - help, ?
