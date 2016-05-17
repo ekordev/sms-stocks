@@ -10,7 +10,7 @@ class UsersApiController < ApplicationController
     users = SubscriptionService.notify_subscribers
     render :json => {
       "message" => users.nil? ? "No subscribers to notify" : "All subscribed users have been notified",
-      "users" => !users.nil? ? users.inspect : "no users"
+      "users" => !users.nil? ? users : "no users"
       }, status: 200
   end
 end

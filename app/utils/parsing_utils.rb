@@ -2,7 +2,7 @@ class ParsingUtils
   NO_FROM_TEXT = "Please pass 'From' parameter or use SMS"
   def self.get_stock_tickers(text)
     return nil if text.blank?
-    arr_tickers = text.split(/[\s,'.:;]/)
+    arr_tickers = text.split(/[\s,':;]/)
     arr_clean_tickers = []
     arr_tickers.each do |ticker|
       ticker.strip!
